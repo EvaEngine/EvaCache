@@ -103,22 +103,21 @@ class Curl extends Request implements ProviderInterface
         $globalCache = IoC::get('globalCache');
         $cacheKey = '_curl_' . md5(serialize(curl_getinfo($this->handle)));
         $content = $globalCache->get($cacheKey);
-        if (!$content) {
+        $headerSize = $globalCache->get($cacheKey . '_h');
+        if (!$content || !$headerSize) {
             $content = curl_exec($this->handle);
+            $headerSize = curl_getinfo($this->handle, CURLINFO_HEADER_SIZE);
+            $globalCache->save($cacheKey . '_h', $headerSize, $this->lifetime);
             $globalCache->save($cacheKey, $content, $this->lifetime);
+            if ($errno = curl_errno($this->handle)) {
+                throw new HttpException(curl_error($this->handle), $errno);
+            }
         }
-
-
-        if ($errno = curl_errno($this->handle)) {
-            throw new HttpException(curl_error($this->handle), $errno);
-        }
-
-        $headerSize = curl_getinfo($this->handle, CURLINFO_HEADER_SIZE);
 
         $response = new Response();
+
         $response->header->parse(substr($content, 0, $headerSize));
         $response->body = substr($content, $headerSize);
-
         return $response;
     }
 
