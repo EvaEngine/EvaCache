@@ -25,7 +25,6 @@ class Curl extends Request implements ProviderInterface
 
     public static function isAvailable()
     {
-        return false;
         return extension_loaded('curl');
     }
 
