@@ -17,11 +17,13 @@ class CacheService
     /**
      * @param callable $callback
      * @param $lifetime
+     *
+     * @return mixed
      * @throws \Phalcon\Http\Client\Provider\Exception
      */
     public static function execute(\Closure $callback, $lifetime)
     {
         $provider = Request::getCachedProvider($lifetime);
-        call_user_func($callback, $provider);
+        return call_user_func($callback, $provider);
     }
 }
