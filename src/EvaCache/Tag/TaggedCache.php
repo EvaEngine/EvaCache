@@ -53,7 +53,7 @@ class TaggedCache
     {
         $key = $this->taggedItemKey($key);
         $value = $this->store->get($key);
-        if (is_null($key) && is_callable($callback)) {
+        if (is_null($value) && is_callable($callback)) {
             $value = call_user_func($callback);
             if ($lifetime >= 0) {
                 $this->store->save($key, $value, $lifetime);
