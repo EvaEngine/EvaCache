@@ -6,10 +6,11 @@
 
 示例代码：
 ```php
-use Eva\EvaCache\HTTPRequest\CacheService;
-use Eva\EvaCache\HTTPRequest\ProviderInterface;
 
-$quotes = CacheService::execute(
+use Eva\EvaCache\CacheManager;
+
+$cacheManager = new CacheManager($this->getDI()->getGlobalCache());
+$quotes = $cacheManager->http(
     function (ProviderInterface $provider) use ($self) {
         $provider->setBaseUri('http://api.markets.wallstreetcn.com/v1/');
         try {

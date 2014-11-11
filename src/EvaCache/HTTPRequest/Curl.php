@@ -2,7 +2,6 @@
 
 namespace Eva\EvaCache\HTTPRequest;
 
-
 // +----------------------------------------------------------------------
 // | [wallstreetcn]
 // +----------------------------------------------------------------------
@@ -12,7 +11,7 @@ namespace Eva\EvaCache\HTTPRequest;
 // +----------------------------------------------------------------------
 // + Curl.php
 // +----------------------------------------------------------------------
-use Eva\EvaEngine\IoC;
+
 use Phalcon\Http\Client\Exception as HttpException;
 use Phalcon\Http\Client\Response;
 use Phalcon\Http\Client\Provider\Exception as ProviderException;
@@ -20,8 +19,12 @@ use Phalcon\Http\Client\Provider\Exception as ProviderException;
 
 class Curl extends Request implements ProviderInterface
 {
-    private $handle = null;
+    protected $handle = null;
     protected $lifetime = 0;
+    /**
+     * @var \Phalcon\Cache\BackendInterface
+     */
+    protected $store;
 
     public static function isAvailable()
     {
@@ -99,16 +102,15 @@ class Curl extends Request implements ProviderInterface
         $header[] = 'Expect:';
         $this->setOption(CURLOPT_HTTPHEADER, $header);
 
-        /** @var \Phalcon\Cache\Backend $globalCache */
-        $globalCache = IoC::get('globalCache');
+
         $cacheKey = '_curl_' . md5(serialize(curl_getinfo($this->handle)));
-        $content = $globalCache->get($cacheKey);
-        $headerSize = $globalCache->get($cacheKey . '_h');
+        $content = $this->store->get($cacheKey);
+        $headerSize = $this->store->get($cacheKey . '_h');
         if (!$content || !$headerSize) {
             $content = curl_exec($this->handle);
             $headerSize = curl_getinfo($this->handle, CURLINFO_HEADER_SIZE);
-            $globalCache->save($cacheKey . '_h', $headerSize, $this->lifetime);
-            $globalCache->save($cacheKey, $content, $this->lifetime);
+            $this->store->save($cacheKey . '_h', $headerSize, $this->lifetime);
+            $this->store->save($cacheKey, $content, $this->lifetime);
             if ($errno = curl_errno($this->handle)) {
                 throw new HttpException(curl_error($this->handle), $errno);
             }
@@ -252,5 +254,21 @@ class Curl extends Request implements ProviderInterface
         $this->initPostFields($params, $useEncoding);
 
         return $this->send();
+    }
+
+    /**
+     * @param \Phalcon\Cache\BackendInterface $store
+     */
+    public function setStore($store)
+    {
+        $this->store = $store;
+    }
+
+    /**
+     * @return \Phalcon\Cache\BackendInterface
+     */
+    public function getStore()
+    {
+        return $this->store;
     }
 }

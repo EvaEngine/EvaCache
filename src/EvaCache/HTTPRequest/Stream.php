@@ -21,9 +21,13 @@ use Phalcon\Http\Uri;
 
 class Stream extends Request implements ProviderInterface
 {
-    private $context = null;
+    protected $context = null;
     protected $lifetime = 0;
-    private $options = array();
+    protected $options = array();
+    /**
+     * @var \Phalcon\Cache\BackendInterface
+     */
+    protected $store;
 
     public static function isAvailable()
     {
@@ -91,14 +95,13 @@ class Stream extends Request implements ProviderInterface
         }
 
         set_error_handler(array($this, 'errorHandler'));
-        /** @var \Phalcon\Cache\Backend $globalCache */
-        $globalCache = IoC::get('globalCache');
+
         $cacheKey = '_curl_' . md5($uri->build() . serialize($this->options));
-        $content = $globalCache->get($cacheKey);
+        $content = $this->store->get($cacheKey);
         if (!$content) {
             $content = file_get_contents($uri->build(), false, $this->context);
             restore_error_handler();
-            $globalCache->save($cacheKey, $content, $this->lifetime);
+            $this->store->save($cacheKey, $content, $this->lifetime);
         }
 
 
@@ -213,5 +216,21 @@ class Stream extends Request implements ProviderInterface
         $this->initPostFields($params);
 
         return $this->send($this->resolveUri($uri));
+    }
+
+    /**
+     * @param \Phalcon\Cache\BackendInterface $store
+     */
+    public function setStore($store)
+    {
+        $this->store = $store;
+    }
+
+    /**
+     * @return \Phalcon\Cache\BackendInterface
+     */
+    public function getStore()
+    {
+        return $this->store;
     }
 }

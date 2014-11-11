@@ -14,7 +14,18 @@ namespace Eva\EvaCache\HTTPRequest;
 
 interface ProviderInterface extends RequestInterface
 {
+
     public function __construct($lifetime);
+
+    /**
+     * @param \Phalcon\Cache\BackendInterface $store
+     */
+    public function setStore($store);
+
+    /**
+     * @return \Phalcon\Cache\BackendInterface
+     */
+    public function getStore();
 
     public static function isAvailable();
 
