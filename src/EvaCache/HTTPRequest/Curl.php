@@ -104,13 +104,20 @@ class Curl extends Request implements ProviderInterface
 
 
         $cacheKey = '_curl_' . md5(serialize(curl_getinfo($this->handle)));
-        $content = $this->store->get($cacheKey);
-        $headerSize = $this->store->get($cacheKey . '_h');
+        $content = $headerSize = '';
+        // lifetime 小于 0 时，不进行任何缓存相关处理
+        if ($this->lifetime >= 0) {
+            $content = $this->store->get($cacheKey);
+            $headerSize = $this->store->get($cacheKey . '_h');
+        }
         if (!$content || !$headerSize) {
             $content = curl_exec($this->handle);
             $headerSize = curl_getinfo($this->handle, CURLINFO_HEADER_SIZE);
-            $this->store->save($cacheKey . '_h', $headerSize, $this->lifetime);
-            $this->store->save($cacheKey, $content, $this->lifetime);
+            // lifetime 小于 0 时，不进行任何缓存相关处理
+            if ($this->lifetime >= 0) {
+                $this->store->save($cacheKey . '_h', $headerSize, $this->lifetime);
+                $this->store->save($cacheKey, $content, $this->lifetime);
+            }
             if ($errno = curl_errno($this->handle)) {
                 throw new HttpException(curl_error($this->handle), $errno);
             }
