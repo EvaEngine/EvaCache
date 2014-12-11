@@ -1,0 +1,20 @@
+{
+    "name": "allovince/evacache",
+    "description": "Cache Module of EvaEngine",
+    "license": "BSD-3-Clause",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Mr.5",
+            "email": "mr5.simple@gmail.com",
+            "homepage": "http://mr-5.cn"
+        }
+    ],
+    "require": {
+        "allovince/evaengine": "dev-master"
+    },
+    "autoload": {
+        "classmap": ["Module.php"],
+        "psr-4": {"Eva\\EvaCache\\": "src/EvaCache"}
+    }
+}
