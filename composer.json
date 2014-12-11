@@ -1,5 +1,5 @@
 {
-    "name": "allovince/evacache",
+    "name": "evaengine/eva-cache",
     "description": "Cache Module of EvaEngine",
     "license": "BSD-3-Clause",
     "minimum-stability": "dev",
