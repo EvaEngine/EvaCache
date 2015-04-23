@@ -33,7 +33,7 @@ class CacheManager
      *
      * @param $key
      * @param callable $callback
-     * @param $lifetime
+     * @param $lifetime 缓存的生存周期, 单位是秒
      * @return mixed
      */
     public function getOrSave($key, \Closure $callback, $lifetime)
